@@ -3,6 +3,7 @@
 
 require 'fileutils'
 require 'alchemy/tasks/helpers'
+require './config/environment.rb'
 require 'alchemy/mount_point'
 
 include Alchemy::Tasks::Helpers
