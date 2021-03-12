@@ -923,7 +923,7 @@ module Alchemy
         let!(:nested_element) { create(:alchemy_element, parent_element: element, page: page) }
 
         it "returns nested elements" do
-          expect(subject).to eq([nested_element])
+          expect(subject).to contain_exactly(nested_element)
         end
 
         context "with hidden nested elements" do
@@ -932,7 +932,7 @@ module Alchemy
           end
 
           it "does not include them" do
-            expect(subject).to eq([nested_element])
+            expect(subject).to contain_exactly(nested_element)
           end
         end
       end
