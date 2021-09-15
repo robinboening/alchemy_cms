@@ -22,6 +22,12 @@
   elements: [article, header, slider, download]
   autogenerate: [header, article, download]
 
+- name: with_boolean_element
+  elements:
+    - boolean
+  autogenerate:
+    - boolean
+
 - name: everything
   elements:
     [

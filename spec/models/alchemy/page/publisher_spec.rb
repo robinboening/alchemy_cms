@@ -27,64 +27,30 @@ RSpec.describe Alchemy::Page::Publisher do
 
     shared_context "with elements" do
       let(:page) do
-        create(:alchemy_page, autogenerate_elements: true).tap do |page|
-          page.draft_version.elements.first.update!(public: false)
-        end
+        create(:alchemy_page, page_layout: "with_boolean_element", autogenerate_elements: true)
       end
-    end
-
-    it "creates a public version" do
-      expect { publish }.to change { page.versions.published.count }.by(1)
     end
 
     context "with elements" do
       include_context "with elements"
 
-      it "copies all published elements to page version" do
-        publish
-        expect(page.reload.public_version.elements.count).to eq(2)
-      end
-    end
-
-    context "with published version existing" do
-      let!(:public_version) do
-        create(:alchemy_page_version, :with_elements, element_count: 3, public_on: Date.yesterday.to_time, page: page)
-      end
-
-      let!(:nested_element) do
-        create(:alchemy_element, page_version: public_version, parent_element: public_version.elements.first)
-      end
-
-      it "does not change current public versions public on date" do
-        expect { publish }.to_not change(page.public_version, :public_on)
-      end
-
-      it "does not create another public version" do
-        expect { publish }.to_not change(page.versions, :count)
-      end
-
-      context "with elements" do
-        include_context "with elements"
-
-        it "copies all published elements to public version" do
+      context "with boolean ingredient" do
+        it "keeps the same ingredient value" do
           publish
-          expect(public_version.reload.elements.count).to eq(2)
+
+          # Old value is nil (even though default is set to true)
+          old_boolean_ingredient = page.draft_version.elements.find_by(name: "boolean").ingredient_by_type("Boolean")
+          puts "old raw value: #{old_boolean_ingredient.read_attribute(:value).inspect}"
+          puts "old casted value: #{old_boolean_ingredient.read_attribute(:value).inspect}"
+
+          # new value is t (first character taken from the default)
+          # 't' is casted to true in Ingredients::Boolean#value method
+          new_boolean_ingredient = page.reload.public_version.elements.find_by(name: "boolean").ingredient_by_type("Boolean")
+          puts "new raw value: #{new_boolean_ingredient.read_attribute(:value)}"
+          puts "new casted value: #{new_boolean_ingredient.value}"
+
+          expect(new_boolean_ingredient.value).to eq(old_boolean_ingredient.value)
         end
-      end
-    end
-
-    context "with publish targets" do
-      let(:target) { Class.new(ActiveJob::Base) }
-
-      around do |example|
-        Alchemy.publish_targets << target
-        example.run
-        Alchemy.instance_variable_set(:@_publish_targets, nil)
-      end
-
-      it "performs each target" do
-        expect(target).to receive(:perform_later).with(page)
-        publish
       end
     end
   end

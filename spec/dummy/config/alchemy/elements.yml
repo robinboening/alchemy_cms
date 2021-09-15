@@ -124,6 +124,12 @@
       type: EssenceLink
       hint: true
 
+- name: boolean
+  ingredients:
+    - role: boolean
+      type: Boolean
+      default: true
+
 - name: all_you_can_eat_ingredients
   hint: true
   taggable: true
