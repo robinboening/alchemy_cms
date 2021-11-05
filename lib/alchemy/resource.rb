@@ -169,7 +169,8 @@ module Alchemy
           name: col.name,
           type: resource_column_type(col),
           relation: resource_relation(col.name),
-        }.delete_if { |_k, v| v.nil? }
+          enum: model.defined_enums[col.name]&.keys,
+        }.delete_if { |_k, v| v.blank? }
       end.compact
     end
 
